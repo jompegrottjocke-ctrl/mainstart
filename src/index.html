@@ -1,12 +1,55 @@
 <!doctype html>
-<html lang="sv"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:"><title>FrameForge</title><link rel="stylesheet" href="style.css"></head>
-<body><aside><div class="brand"><span class="brand-icon">F</span>FrameForge<span class="beta">BETA</span></div><div class="workspace">DIN ARBETSYTA</div><button class="nav selected">▧ <span>Konvertera</span></button><div class="sidebar-bottom"><span class="privacy-dot"></span> Lokalt. Privat. Ditt.<p>Dina videor lämnar aldrig datorn.</p><span class="version">FRAMEFORGE / 0.2</span></div></aside>
-<main><header><div><span class="eyebrow">VIDEO, PÅ DINA VILLKOR</span><h1>Från råfil till redo<span>.</span></h1><p>Ge dina videor rätt format. Vi tar hand om resten.</p></div><button id="settings" class="secondary">⚙ FFmpeg-inställningar</button></header>
-<section id="install-panel" class="install-panel" hidden><div><strong>Gör datorn redo för video.</strong><p>Hämta FFmpeg från BtbN, en Windows-distribution länkad av FFmpeg. Installeras bara för dig, utan administratörsrättigheter.</p><small>Internet krävs för nedladdningen. Videofilerna stannar på din dator.</small><p id="install-status" role="status" aria-live="polite"></p></div><button id="download-ffmpeg" class="primary">↓ Ladda ned FFmpeg</button></section>
-<div id="notice" role="status" class="notice" hidden></div>
-<div class="columns"><section class="source-panel"><div class="section-title"><h2>Din konverteringskö <span id="count">0</span></h2><button id="clear" class="text-button">Rensa</button></div>
-<div class="dropzone" id="empty"><div class="file-icon">↥</div><h3>Stora idéer börjar med en fil.</h3><p>Lägg till en video eller en hel samling.<br>MP4, MKV, MOV, WebM och fler format.</p><button id="add" class="primary">＋ Välj videofiler</button><small>Originalfilerna bevaras alltid</small></div>
-<div id="queue" class="queue"></div><button id="addMore" class="secondary full" hidden>＋ Lägg till fler videor</button>
-<div class="tip"><span>✦</span><div><strong>Lite mindre fil. Samma stora upplevelse.</strong><p>Välj Liten fil för videor som är enklare att dela.</p></div></div></section>
-<section class="options"><div class="section-title"><h2>Gör den till din</h2><span class="step">UTDATA</span></div><label class="field-label">FÖRINSTÄLLNING</label><div class="presets"><button class="preset active" data-preset="balanced"><span class="preset-symbol">◈</span><span><strong>Balanserad</strong><small>Fin kvalitet. Rimlig filstorlek. Upp till 1080p.</small></span><i></i></button><button class="preset" data-preset="quality"><span class="preset-symbol">✧</span><span><strong>Hög kvalitet</strong><small>För detaljerna som räknas. Upp till 4K.</small></span><i></i></button><button class="preset" data-preset="compact"><span class="preset-symbol">↙</span><span><strong>Liten fil</strong><small>Enklare att lagra och dela. Upp till 720p.</small></span><i></i></button></div>
-<label class="field-label" for="codec">VIDEOKODARE</label><select id="codec"><option value="h264">H.264 · Bred kompatibilitet</option><option value="h265">H.265 · Effektivare komprimering</option></select><div class="format-note">MP4-container <span>•</span> AAC-ljud <span>•</span> Originalets bildfrekvens</div><label class="field-label">SPARA I</label><button id="output" class="folder">▱ <span>Välj utdatamapp</span> <b>…</b></button><p class="detail">Alla ljudspår konverteras till AAC. Undertexter inkluderas inte i denna version.</p><div class="divider"></div><div class="summary"><span>Helt lokalt på din dator</span><span>⌁</span></div><button id="start" class="primary full" disabled>Starta konvertering <span>→</span></button><button id="cancel" class="secondary full" hidden>Avbryt kön</button><button id="open" class="text-button full" hidden>Öppna utdatamappen ↗</button></section></div><footer><span><i></i> <span id="engine">Kontrollerar FFmpeg…</span></span><span>Skapat för ett smidigare videoflöde.</span></footer></main><script src="renderer.js"></script></body></html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:">
+  <title>FrameForge</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<aside>
+  <div class="brand"><span class="brand-icon">F</span>FrameForge<span class="beta">BETA</span></div>
+  <div class="workspace" data-i18n="workspace"></div>
+  <button class="nav selected">▧ <span data-i18n="convert"></span></button>
+  <div class="language-picker"><label for="language" data-i18n="language"></label><select id="language"><option value="sv">Svenska</option><option value="en">English</option></select></div>
+  <div class="sidebar-bottom"><span class="privacy-dot"></span><span data-i18n="private"></span><p data-i18n="localFiles"></p><span class="version">FRAMEFORGE / 0.3</span></div>
+</aside>
+<main>
+  <header><div><span class="eyebrow" data-i18n="eyebrow"></span><h1><span class="headline" data-i18n="heading"></span><span>.</span></h1><p data-i18n="intro"></p></div><button id="settings" class="secondary" data-i18n="settings"></button></header>
+  <section id="install-panel" class="install-panel" hidden><div><strong data-i18n="installTitle"></strong><p data-i18n="installIntro"></p><small data-i18n="installPrivacy"></small><p id="install-status" role="status" aria-live="polite"></p></div><button id="download-ffmpeg" class="primary" data-i18n="download"></button></section>
+  <div id="notice" role="status" class="notice" hidden></div>
+  <div class="columns">
+    <section class="source-panel">
+      <div class="section-title"><h2><span data-i18n="queueTitle"></span> <span id="count">0</span></h2><button id="clear" class="text-button" data-i18n="clear"></button></div>
+      <div class="dropzone" id="empty"><div class="file-icon">↥</div><h3 data-i18n="emptyTitle"></h3><p data-i18n="emptyIntro"></p><button id="add" class="primary" data-i18n="add"></button><small data-i18n="preserve"></small></div>
+      <div id="queue" class="queue"></div><button id="addMore" class="secondary full" data-i18n="addMore" hidden></button>
+      <div class="tip"><span>✦</span><div><strong data-i18n="tipTitle"></strong><p data-i18n="tipIntro"></p></div></div>
+    </section>
+    <section class="options">
+      <div class="section-title"><h2 data-i18n="optionsTitle"></h2><span class="step" data-i18n="outputBadge"></span></div>
+      <div class="options-body">
+      <label class="field-label" data-i18n="presetLabel"></label>
+      <div class="presets">
+        <button class="preset active" data-preset="balanced" aria-pressed="true"><span class="preset-symbol">◈</span><span><strong data-i18n="balanced"></strong><small data-profile-description="balanced"></small></span><i></i></button>
+        <button class="preset" data-preset="quality" aria-pressed="false"><span class="preset-symbol">✧</span><span><strong data-i18n="quality"></strong><small data-profile-description="quality"></small></span><i></i></button>
+        <button class="preset" data-preset="compact" aria-pressed="false"><span class="preset-symbol">↙</span><span><strong data-i18n="compact"></strong><small data-profile-description="compact"></small></span><i></i></button>
+      </div>
+      <label class="field-label" for="codec" data-i18n="codecLabel"></label>
+      <select id="codec"><option value="h264">H.264 / AVC</option><option value="h265">H.265 / HEVC</option><option value="av1">AV1</option><option value="vp9">VP9</option></select>
+      <p id="codec-description" class="detail"></p>
+      <label class="field-label" for="container" data-i18n="containerLabel"></label>
+      <select id="container"><option value="mp4">MP4 (.mp4)</option><option value="mkv">Matroska (.mkv)</option><option value="webm">WebM (.webm)</option><option value="mov">QuickTime (.mov)</option></select>
+      <p id="compatibility" class="detail" role="status" aria-live="polite"></p>
+      <details class="technical"><summary data-i18n="technical"></summary><dl id="technical-details"></dl><p id="rate-explanation" class="detail"></p></details>
+      <details class="advanced"><summary data-i18n="advanced"></summary>
+        <label class="field-label" for="rate-control" data-i18n="rateLabel"></label><select id="rate-control"><option value="crf" data-i18n="crfOption"></option><option value="bitrate" data-i18n="bitrateOption"></option></select>
+        <div id="bitrate-field" hidden><label class="field-label" for="video-bitrate" data-i18n="bitrateLabel"></label><input id="video-bitrate" type="number" min="100" max="200000" step="100" value="4000"><p class="detail" data-i18n="bitrateHelp"></p></div>
+      </details>
+      <label class="field-label" data-i18n="saveIn"></label><button id="output" class="folder">▱ <span id="output-label"></span> <b>…</b></button>
+      <p class="detail" data-i18n="trackNote"></p></div><div class="options-actions"><div class="divider"></div><div class="summary"><span data-i18n="localProcessing"></span><span>⌁</span></div>
+      <button id="start" class="primary full" data-i18n="start" disabled></button><button id="cancel" class="secondary full" data-i18n="cancel" hidden></button><button id="open" class="text-button full" data-i18n="openOutput" hidden></button></div>
+    </section>
+  </div>
+  <footer><span><i></i><span id="engine"></span></span><span data-i18n="footer"></span></footer>
+</main>
+<script src="formats.js"></script><script src="i18n.js"></script><script src="renderer.js"></script>
+</body></html>

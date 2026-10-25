@@ -1,21 +1,24 @@
 const { spawn } = require('node:child_process');
 const path = require('node:path');
 const fs = require('node:fs');
-const presets = {
-  balanced: { label: 'Balanserad', crf: 22, speed: 'medium', width: 1920 },
-  quality: { label: 'Hög kvalitet', crf: 18, speed: 'slow', width: 3840 },
-  compact: { label: 'Liten fil', crf: 28, speed: 'medium', width: 1280 },
-};
+const { presets, settingsFor } = require('./formats.js');
 function buildArgs(job) {
-  const preset = presets[job.preset];
-  if (!preset) throw new Error('Okänd förinställning.');
-  if (!['h264', 'h265'].includes(job.codec)) throw new Error('Okänd videokodare.');
+  const settings = settingsFor(job);
+  const { preset, codec, container, crf, speed, rateControl, videoKbps } = settings;
   if (!job.input || !job.output || path.resolve(job.input) === path.resolve(job.output)) throw new Error('Välj separata in- och utdatafiler.');
+  const video = ['-c:v', codec.encoder, codec.speedFlag, speed];
+  if (codec.encoder === 'libvpx-vp9') video.push('-deadline', 'good');
+  if (rateControl === 'crf') {
+    video.push('-crf', String(crf));
+    if (codec.encoder === 'libvpx-vp9') video.push('-b:v', '0');
+  } else video.push('-b:v', `${videoKbps}k`);
+  if (codec.encoder === 'libx265' && ['mp4', 'mov'].includes(settings.containerId)) video.push('-tag:v', 'hvc1');
   return ['-hide_banner', '-nostdin', '-n', '-i', job.input,
-    '-map', '0:v:0', '-map', '0:a?', '-sn', '-c:v', job.codec === 'h265' ? 'libx265' : 'libx264',
-    '-preset', preset.speed, '-crf', String(preset.crf), '-vf', `scale=w='trunc(min(${preset.width},iw)/2)*2':h=-2`,
-    '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart',
-    '-progress', 'pipe:1', '-nostats', job.output];
+    '-map', '0:v:0', '-map', '0:a?', '-sn', '-map_chapters', '-1', ...video,
+    '-vf', `scale=w='min(${preset.width},iw)':h='min(${preset.height},ih)':force_original_aspect_ratio=decrease:force_divisible_by=2`,
+    '-pix_fmt', 'yuv420p', '-c:a', container.audio, '-b:a', `${container.audioKbps}k`,
+    ...(['mp4', 'mov'].includes(settings.containerId) ? ['-movflags', '+faststart'] : []),
+    '-f', container.muxer, '-progress', 'pipe:1', '-nostats', job.output];
 }
 function encode(binary, job, onProgress = () => {}) {
   const args = buildArgs(job);

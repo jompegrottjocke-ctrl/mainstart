@@ -1,11 +1,58 @@
 const $ = id => document.getElementById(id);
+const { codecs, containers, presets, settingsFor } = window.FrameForgeFormats;
+const { translate, message } = window.FrameForgeI18n;
+let language = 'sv';
+try { if (localStorage.getItem('frameforge.language') === 'en') language = 'en'; } catch {}
 let jobs = [], preset = 'balanced', output = null, ready = false, running = false, stopping = false, installing = false;
-function notice(message) { $('notice').textContent = message; $('notice').hidden = !message; }
+let availableCodecs = null, noticeValue = null, installMessage = null, adjustment = null;
+const t = (key, values) => translate(key, language, values);
+const supported = key => availableCodecs === null || availableCodecs.includes(key);
+function selection() { return { preset, codec: $('codec').value, container: $('container').value, rateControl: $('rate-control').value, videoKbps: Number($('video-bitrate').value) }; }
+function notice(value) { noticeValue = value; renderNotice(); }
+function renderNotice() {
+  $('notice').textContent = !noticeValue ? '' : typeof noticeValue === 'string' ? message(noticeValue, language) : t(noticeValue.key, noticeValue.values);
+  $('notice').hidden = !noticeValue;
+}
 function controls() {
-  $('start').disabled = running || installing || !ready || !output || !jobs.some(j => j.state === 'waiting');
+  let valid = true;
+  try { settingsFor(selection()); } catch { valid = false; }
+  $('start').disabled = running || installing || !ready || !valid || !supported($('codec').value) || !output || !jobs.some(j => j.state === 'waiting');
   $('cancel').hidden = !running;
-  for (const id of ['add', 'addMore', 'clear', 'output', 'codec', 'settings']) $(id).disabled = running || installing;
+  for (const id of ['add', 'addMore', 'clear', 'output', 'codec', 'container', 'rate-control', 'video-bitrate', 'settings']) $(id).disabled = running || installing;
   document.querySelectorAll('.preset').forEach(b => b.disabled = running || installing);
+  $('download-ffmpeg').disabled = installing || running;
+}
+function renderSettings() {
+  const choice = selection();
+  for (const [id, codec] of Object.entries(codecs)) {
+    const option = $('codec').querySelector(`[value="${id}"]`);
+    option.textContent = `${codec.label}${supported(id) ? '' : ` · ${t('unavailable')}`}`;
+    option.disabled = !supported(id);
+  }
+  for (const node of document.querySelectorAll('[data-profile-description]')) {
+    const id = node.dataset.profileDescription;
+    const profile = presets[id], codec = codecs[choice.codec];
+    node.textContent = t('profileDescription', { resolution: t('maxSize', profile), rate: choice.rateControl === 'crf' ? `CRF ${codec.crf[id]}` : t('target', { value: choice.videoKbps || '—' }), speed: `${codec.speedFlag} ${codec.speeds[id]}` });
+  }
+  $('codec-description').textContent = t(`codec_${choice.codec}`);
+  $('compatibility').textContent = adjustment ? t(adjustment.key, { codec: codecs[choice.codec].label, container: containers[choice.container].label }) : t('compatible', { containers: codecs[choice.codec].containers.map(id => containers[id].label).join(', ') });
+  $('bitrate-field').hidden = choice.rateControl !== 'bitrate';
+  const list = $('technical-details'); list.replaceChildren();
+  try {
+    const settings = settingsFor(choice);
+    const rows = [
+      ['video', `${settings.codec.label} · ${settings.codec.encoder}`],
+      ['container', `${settings.container.label} (.${settings.container.extension})`],
+      ['videoRate', settings.rateControl === 'crf' ? t('variable', settings) : t('target', { value: settings.videoKbps })],
+      ['audio', t('audioRate', { codec: settings.container.audioLabel, rate: settings.container.audioKbps })],
+      ['resolution', t('scale', settings.preset)],
+      ['frameRate', t('originalFps')], ['color', 'yuv420p · 8-bit · 4:2:0'],
+      ['encoding', t('cpu', { flag: settings.codec.speedFlag, speed: settings.speed })],
+    ];
+    for (const [key, value] of rows) { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = t(key); dd.textContent = value; list.append(dt, dd); }
+    $('rate-explanation').textContent = supported(choice.codec) ? t(choice.rateControl === 'crf' ? 'crfHelp' : 'vbrHelp') : t('noEncoder');
+  } catch (error) { $('rate-explanation').textContent = message(error.message, language); }
+  controls();
 }
 function render() {
   $('count').textContent = jobs.length; $('empty').hidden = jobs.length > 0; $('addMore').hidden = jobs.length === 0;
@@ -16,15 +63,29 @@ function render() {
     const icon = document.createElement('span'); icon.className = 'job-icon'; icon.textContent = job.state === 'done' ? '✓' : '▷';
     const info = document.createElement('div'); info.className = 'job-info';
     const title = document.createElement('strong'); title.textContent = job.name; title.title = job.name;
-    const size = document.createElement('small'); size.textContent = `${(job.size / 1048576).toFixed(1)} MB · MP4-utdata`;
+    const choice = job.settings || selection();
+    const size = document.createElement('small'); size.textContent = t('jobFormat', { size: (job.size / 1048576).toFixed(1), codec: codecs[choice.codec].label, container: containers[choice.container].label });
     info.append(title, size); top.append(icon, info);
-    const remove = document.createElement('button'); remove.className = 'remove'; remove.textContent = '×'; remove.ariaLabel = `Ta bort ${job.name}`; remove.disabled = running;
+    const remove = document.createElement('button'); remove.className = 'remove'; remove.textContent = '×'; remove.ariaLabel = t('remove', { name: job.name }); remove.disabled = running || installing;
     remove.onclick = () => { jobs = jobs.filter(j => j.id !== job.id); render(); }; top.append(remove);
-    const status = document.createElement('div'); status.className = 'job-status'; status.textContent = job.message || 'Redo i kön';
+    const status = document.createElement('div'); status.className = 'job-status';
+    if (job.state === 'done') status.textContent = t('done', { output: job.output });
+    else if (job.state === 'error') status.textContent = job.cancelled ? t('cancelled') : message(job.error, language);
+    else if (job.state === 'running') status.textContent = job.seconds === undefined ? t('starting') : t('converting', { seconds: Math.floor(job.seconds) }) + (job.speed ? t('speed', { speed: job.speed }) : '');
+    else status.textContent = t('waiting');
     row.append(top, status); $('queue').append(row);
   }
   controls();
 }
+function applyLanguage() {
+  document.documentElement.lang = language; $('language').value = language;
+  document.querySelectorAll('[data-i18n]').forEach(node => { node.textContent = t(node.dataset.i18n); });
+  $('output-label').textContent = output ? output.path : t('chooseOutput');
+  $('engine').textContent = t(ready ? 'ready' : availableCodecs === null ? 'checking' : 'missing');
+  $('install-status').textContent = installMessage ? (installMessage.key ? t(installMessage.key) : message(installMessage, language)) : '';
+  renderSettings(); render(); renderNotice();
+}
+$('language').onchange = () => { language = $('language').value; try { localStorage.setItem('frameforge.language', language); } catch {} applyLanguage(); };
 async function add() {
   try { const files = await window.desktop.addFiles(); jobs.push(...files.map(j => ({ ...j, state: 'waiting' }))); render(); }
   catch (error) { notice(error.message); }
@@ -33,36 +94,57 @@ $('add').onclick = add; $('addMore').onclick = add;
 $('clear').onclick = () => { jobs = []; render(); };
 document.querySelectorAll('.preset').forEach(button => button.onclick = () => {
   preset = button.dataset.preset;
-  document.querySelectorAll('.preset').forEach(b => b.classList.toggle('active', b === button));
+  document.querySelectorAll('.preset').forEach(b => { b.classList.toggle('active', b === button); b.setAttribute('aria-pressed', String(b === button)); });
+  renderSettings(); render();
 });
+$('codec').onchange = () => {
+  adjustment = null;
+  if (!codecs[$('codec').value].containers.includes($('container').value)) { $('container').value = codecs[$('codec').value].containers[0]; adjustment = { key: 'autoContainer' }; }
+  renderSettings(); render();
+};
+$('container').onchange = () => {
+  adjustment = null;
+  if (!codecs[$('codec').value].containers.includes($('container').value)) {
+    const compatible = Object.keys(codecs).filter(key => codecs[key].containers.includes($('container').value));
+    $('codec').value = compatible.find(supported) || compatible[0]; adjustment = { key: 'autoCodec' };
+  }
+  renderSettings(); render();
+};
+$('rate-control').onchange = () => { renderSettings(); render(); };
+$('video-bitrate').oninput = () => { renderSettings(); };
 $('output').onclick = async () => {
-  try { const folder = await window.desktop.chooseOutput(); if (folder) { output = folder; $('output').querySelector('span').textContent = folder.path; $('output').title = folder.path; controls(); } }
+  try { const folder = await window.desktop.chooseOutput(); if (folder) { output = folder; $('output-label').textContent = folder.path; $('output').title = folder.path; controls(); } }
   catch (error) { notice(error.message); }
 };
 function engine(status) {
-  $('install-panel').hidden = status.ready;
-  $('download-ffmpeg').disabled = installing;
-  ready = status.ready; $('engine').textContent = ready ? 'FFmpeg är redo' : 'FFmpeg saknas';
-  notice(''); controls();
+  ready = status.ready; availableCodecs = status.availableCodecs ?? null;
+  if (ready && !supported($('codec').value) && availableCodecs?.length) {
+    $('codec').value = availableCodecs[0];
+    if (!codecs[$('codec').value].containers.includes($('container').value)) $('container').value = codecs[$('codec').value].containers[0];
+  }
+  $('install-panel').hidden = ready;
+  $('engine').textContent = t(ready ? 'ready' : 'missing');
+  notice(null); renderSettings(); render();
 }
 $('download-ffmpeg').onclick = async () => {
-  installing = true; $('download-ffmpeg').disabled = true; controls(); notice('');
-  $('install-status').textContent = 'Förbereder nedladdningen…';
-  try { engine(await window.desktop.downloadFFmpeg()); notice('FFmpeg är installerat och redo. Nu kan du konvertera dina videor.'); }
-  catch (error) { $('install-status').textContent = 'Installationen misslyckades. Du kan försöka igen eller välja en egen ffmpeg.exe via inställningarna.'; notice(error.message); }
-  finally { installing = false; $('download-ffmpeg').disabled = false; controls(); }
+  installing = true; controls(); notice(null); installMessage = { key: 'installPreparing' }; $('install-status').textContent = t('installPreparing');
+  try { engine(await window.desktop.downloadFFmpeg()); notice({ key: 'installed' }); }
+  catch (error) { installMessage = { key: 'installFailed' }; $('install-status').textContent = t('installFailed'); notice(error.message); }
+  finally { installing = false; controls(); }
 };
-window.desktop.onInstallProgress(message => { $('install-status').textContent = message; });
-$('settings').onclick = async () => { try { engine(await window.desktop.chooseBinary()); } catch (error) { notice(error.message); } };
+window.desktop.onInstallProgress(value => { installMessage = value; $('install-status').textContent = message(value, language); });
+$('settings').onclick = async () => { try { engine(await window.desktop.chooseBinary(language)); } catch (error) { notice(error.message); } };
 $('start').onclick = async () => {
-  running = true; stopping = false; notice(''); $('open').hidden = true; render();
-  const codec = $('codec').value;
+  const settings = selection();
+  try { settingsFor(settings); } catch (error) { notice(error.message); return; }
+  if (!supported(settings.codec)) { notice({ key: 'noEncoder' }); return; }
+  running = true; stopping = false; notice(null); $('open').hidden = true; render();
   try {
     for (const job of jobs.filter(j => j.state === 'waiting')) {
       if (stopping) break;
-      job.state = 'running'; job.message = 'Startar kodaren…'; render();
-      try { const result = await window.desktop.encode({ id: job.id, outputId: output.id, preset, codec }); job.state = 'done'; job.message = `Klar · ${result.output}`; }
-      catch (error) { job.state = 'error'; job.message = stopping ? 'Avbruten. Ta bort filen och lägg till den igen för att försöka på nytt.' : error.message; }
+      job.state = 'running'; job.settings = { ...settings }; render();
+      try { const result = await window.desktop.encode({ id: job.id, outputId: output.id, ...settings }); job.state = 'done'; job.output = result.output; }
+      catch (error) { job.state = 'error'; job.cancelled = stopping; job.error = error.message; }
       render();
     }
   } finally { running = false; $('open').hidden = !jobs.some(j => j.state === 'done'); render(); }
@@ -73,6 +155,7 @@ window.desktop.onProgress(progress => {
   const job = jobs.find(j => j.id === progress.id); if (!job || job.state !== 'running') return;
   if (Number.isFinite(progress.seconds)) job.seconds = progress.seconds;
   if (progress.speed) job.speed = progress.speed;
-  job.message = `Konverterar · ${Math.floor(job.seconds || 0)} s video behandlad${job.speed ? ` · ${job.speed} hastighet` : ''}`; render();
+  render();
 });
-window.desktop.status().then(engine).catch(error => notice(error.message)); render();
+applyLanguage();
+window.desktop.status().then(engine).catch(error => notice(error.message));
