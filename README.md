@@ -1,6 +1,6 @@
 # FrameForge
 
-![FrameForge 0.4 – English interface](docs/frameforge-0.4.png)
+![FrameForge 0.4 – English interface](docs/frameforge-0.4-en.png)
 
 En första Windows-app för lokal videokonvertering, byggd med Electron och FFmpeg. Svenskt och engelskt gränssnitt, filkö, tre kvalitetsprofiler, H.264/H.265/AV1/VP9, fyra containrar och avbrytning. Originalfiler och befintliga utdatafiler skrivs inte över.
 
