@@ -1,5 +1,15 @@
 # FrameForge
 
+## Download for Windows / Ladda ned för Windows
+
+[![Download for Windows](https://img.shields.io/badge/Download_for_Windows-FrameForge-c3efa3?style=for-the-badge&logo=windows&logoColor=172310)](https://github.com/jompegrottjocke-ctrl/mainstart/actions/workflows/windows.yml)
+
+**[Open Windows downloads / Öppna Windows-nedladdningar](https://github.com/jompegrottjocke-ctrl/mainstart/actions/workflows/windows.yml)**
+
+Open the latest successful build (green check), select **FrameForge-Windows** under **Artifacts**, unzip the download and run **FrameForge Setup … .exe**. A GitHub login is required to download artifacts. FFmpeg can be downloaded from inside the app.
+
+Öppna det senaste lyckade bygget (grön bock), välj **FrameForge-Windows** under **Artifacts**, packa upp ZIP-filen och kör **FrameForge Setup … .exe**. Du behöver vara inloggad på GitHub för att hämta filen. FFmpeg kan laddas ned direkt i appen.
+
 ![FrameForge 0.4 – English interface](docs/frameforge-0.4-en.png)
 
 En första Windows-app för lokal videokonvertering, byggd med Electron och FFmpeg. Svenskt och engelskt gränssnitt, filkö, tre kvalitetsprofiler, H.264/H.265/AV1/VP9, fyra containrar och avbrytning. Originalfiler och befintliga utdatafiler skrivs inte över.
