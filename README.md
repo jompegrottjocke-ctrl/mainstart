@@ -1,5 +1,7 @@
 # FrameForge
 
+![FrameForge 0.4 – kompakt gränssnitt](docs/frameforge-0.4.png)
+
 En första Windows-app för lokal videokonvertering, byggd med Electron och FFmpeg. Svenskt och engelskt gränssnitt, filkö, tre kvalitetsprofiler, H.264/H.265/AV1/VP9, fyra containrar och avbrytning. Originalfiler och befintliga utdatafiler skrivs inte över.
 
 Detta är en tidig version, inte full funktionsparitet med HandBrake. Undertexter, GPU-kodning, videoförhandsvisning, kapitel och avancerat spårval finns ännu inte. FFmpeg körs på CPU. Alla ljudspår inkluderas som AAC (MP4/MKV/MOV) eller Opus (WebM). HDR konverteras inte med tonmappning; använd SDR-källor tills HDR-stöd finns.
@@ -11,7 +13,7 @@ Detta är en tidig version, inte full funktionsparitet med HandBrake. Undertexte
 3. Kör `npm start`. Om FFmpeg saknas visas **Ladda ned FFmpeg**. Klicka för att hämta, verifiera och installera det automatiskt. Du kan också välja en egen `ffmpeg.exe` via **FFmpeg-inställningar**.
 4. Lägg till videor och välj kvalitetsprofil, kodare och container. Klicka **Starta konvertering**. Om ingen utdatamapp är vald öppnas mappdialogen automatiskt; konverteringen startar efter valet. Avbryts dialogen ligger kön kvar utan att starta. En redan vald mapp återanvänds.
 
-Filer bearbetas sekventiellt. Avbrutna och misslyckade jobb raderar sin ofullständiga utdatafil. Appen väljer ett ledigt filnamn automatiskt. Kö och utdatamapp sparas inte mellan starter; FFmpeg-sökvägen sparas i användarens appdata. Språk väljs via **Språk / Language** i sidopanelen och sparas lokalt mellan starter.
+Filer bearbetas sekventiellt. Avbrutna och misslyckade jobb raderar sin ofullständiga utdatafil. Appen väljer ett ledigt filnamn automatiskt. Kö och utdatamapp sparas inte mellan starter; FFmpeg-sökvägen sparas i användarens appdata. Språk väljs via **Språk / Language** i toppraden och sparas lokalt mellan starter.
 
 ## Verifiering
 
@@ -61,3 +63,7 @@ Svenska och engelska omfattar profiler, tekniska förklaringar, status, knapptex
 ## Fönster och layout (0.3.1)
 
 Startfönstret anpassas till skärmens tillgängliga arbetsyta, även vid Windows-skärmskalning. Smalare fönster använder en kolumn och inställningarna följer vanlig sidrullning i stället för en höjdbegränsad inre panel. Startåtgärderna följer med längst ned i den synliga inställningspanelen. Inställningar kan nås utan att förstora fönstret.
+
+## Kompakt gränssnitt (0.4)
+
+En smal topprad samlar språk och FFmpeg-inställningar. Källfiler väljs i en kompakt horisontell yta; filkön har egen rullning efter flera filer. Kvalitetsprofilerna ligger sida vid sida, liksom kodek/container och de utfällbara tekniska inställningarna. Utdatamapp och konverteringsknapp delar en åtgärdsrad som följer med vid rullning. På små fönster staplas kontrollerna utan att döljas. SVG-ikoner medföljer appen och kräver inga nätverkstjänster.

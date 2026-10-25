@@ -6,50 +6,58 @@
   <title>FrameForge</title><link rel="stylesheet" href="style.css">
 </head>
 <body>
-<aside>
-  <div class="brand"><span class="brand-icon">F</span>FrameForge<span class="beta">BETA</span></div>
-  <div class="workspace" data-i18n="workspace"></div>
-  <button class="nav selected">▧ <span data-i18n="convert"></span></button>
-  <div class="language-picker"><label for="language" data-i18n="language"></label><select id="language"><option value="sv">Svenska</option><option value="en">English</option></select></div>
-  <div class="sidebar-bottom"><span class="privacy-dot"></span><span data-i18n="private"></span><p data-i18n="localFiles"></p><span class="version">FRAMEFORGE / 0.3.1</span></div>
-</aside>
+<svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+  <symbol id="icon-file" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6"/><path d="m10 12 5 3-5 3z"/></symbol>
+  <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+  <symbol id="icon-sliders" viewBox="0 0 24 24"><path d="M4 6h9m4 0h3M4 12h3m4 0h9M4 18h11m4 0h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></symbol>
+  <symbol id="icon-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="icon-balanced" viewBox="0 0 24 24"><path d="m12 3 9 9-9 9-9-9z"/><path d="m12 8 4 4-4 4-4-4z"/></symbol>
+  <symbol id="icon-quality" viewBox="0 0 24 24"><path d="m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></symbol>
+  <symbol id="icon-compact" viewBox="0 0 24 24"><path d="M4 4h6v6M20 20h-6v-6M10 10 3 3m11 11 7 7M16 4h4v4M4 16v4h4"/></symbol>
+  <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+</defs></svg>
+<div class="appbar">
+  <div class="brand"><span class="brand-icon">F<span></span></span>FrameForge<span class="beta">BETA</span></div>
+  <span class="app-mode" data-i18n="convert"></span>
+  <div class="app-tools"><span class="engine-state"><i></i><span id="engine"></span></span><div class="language-picker"><label for="language" data-i18n="language"></label><select id="language"><option value="sv">Svenska</option><option value="en">English</option></select></div><button id="settings" class="icon-button"><svg class="icon" aria-hidden="true"><use href="#icon-sliders"/></svg><span data-i18n="settings"></span></button></div>
+</div>
 <main>
-  <header><div><span class="eyebrow" data-i18n="eyebrow"></span><h1><span class="headline" data-i18n="heading"></span><span>.</span></h1><p data-i18n="intro"></p></div><button id="settings" class="secondary" data-i18n="settings"></button></header>
+  <header class="page-heading"><div><span class="eyebrow" data-i18n="eyebrow"></span><h1><span data-i18n="heading"></span><span class="accent">.</span></h1><p data-i18n="intro"></p></div><span class="privacy-tag"><span class="privacy-dot"></span><span data-i18n="private"></span></span></header>
   <section id="install-panel" class="install-panel" hidden><div><strong data-i18n="installTitle"></strong><p data-i18n="installIntro"></p><small data-i18n="installPrivacy"></small><p id="install-status" role="status" aria-live="polite"></p></div><button id="download-ffmpeg" class="primary" data-i18n="download"></button></section>
   <div id="notice" role="status" class="notice" hidden></div>
   <div class="columns">
     <section class="source-panel">
-      <div class="section-title"><h2><span data-i18n="queueTitle"></span> <span id="count">0</span></h2><button id="clear" class="text-button" data-i18n="clear"></button></div>
-      <div class="dropzone" id="empty"><div class="file-icon">↥</div><h3 data-i18n="emptyTitle"></h3><p data-i18n="emptyIntro"></p><button id="add" class="primary" data-i18n="add"></button><small data-i18n="preserve"></small></div>
-      <div id="queue" class="queue"></div><button id="addMore" class="secondary full" data-i18n="addMore" hidden></button>
-      <div class="tip"><span>✦</span><div><strong data-i18n="tipTitle"></strong><p data-i18n="tipIntro"></p></div></div>
+      <div class="section-title"><h2><span class="section-index">01</span><span data-i18n="queueTitle"></span><span id="count" class="count">0</span></h2><button id="clear" class="text-button" data-i18n="clear"></button></div>
+      <div class="dropzone" id="empty"><div class="file-icon"><svg class="icon" aria-hidden="true"><use href="#icon-file"/></svg></div><div class="upload-copy"><h3 data-i18n="emptyTitle"></h3><p data-i18n="emptyIntro"></p></div><button id="add" class="secondary add-button"><svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg><span data-i18n="add"></span></button></div>
+      <div id="queue" class="queue"></div><button id="addMore" class="text-button add-more" hidden><svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg><span data-i18n="addMore"></span></button>
     </section>
     <section class="options">
-      <div class="section-title"><h2 data-i18n="optionsTitle"></h2><span class="step" data-i18n="outputBadge"></span></div>
+      <div class="section-title"><h2><span class="section-index">02</span><span data-i18n="optionsTitle"></span></h2><span class="step" data-i18n="outputBadge"></span></div>
       <div class="options-body">
-      <label class="field-label" data-i18n="presetLabel"></label>
-      <div class="presets">
-        <button class="preset active" data-preset="balanced" aria-pressed="true"><span class="preset-symbol">◈</span><span><strong data-i18n="balanced"></strong><small data-profile-description="balanced"></small></span><i></i></button>
-        <button class="preset" data-preset="quality" aria-pressed="false"><span class="preset-symbol">✧</span><span><strong data-i18n="quality"></strong><small data-profile-description="quality"></small></span><i></i></button>
-        <button class="preset" data-preset="compact" aria-pressed="false"><span class="preset-symbol">↙</span><span><strong data-i18n="compact"></strong><small data-profile-description="compact"></small></span><i></i></button>
+        <label class="field-label" data-i18n="presetLabel"></label>
+        <div class="presets">
+          <button class="preset active" data-preset="balanced" aria-pressed="true"><span class="preset-heading"><svg class="icon preset-symbol" aria-hidden="true"><use href="#icon-balanced"/></svg><strong data-i18n="balanced"></strong><i></i></span><small data-profile-description="balanced"></small></button>
+          <button class="preset" data-preset="quality" aria-pressed="false"><span class="preset-heading"><svg class="icon preset-symbol" aria-hidden="true"><use href="#icon-quality"/></svg><strong data-i18n="quality"></strong><i></i></span><small data-profile-description="quality"></small></button>
+          <button class="preset" data-preset="compact" aria-pressed="false"><span class="preset-heading"><svg class="icon preset-symbol" aria-hidden="true"><use href="#icon-compact"/></svg><strong data-i18n="compact"></strong><i></i></span><small data-profile-description="compact"></small></button>
+        </div>
+        <div class="format-grid">
+          <div class="format-field"><label class="field-label" for="codec" data-i18n="codecLabel"></label><select id="codec"><option value="h264">H.264 / AVC</option><option value="h265">H.265 / HEVC</option><option value="av1">AV1</option><option value="vp9">VP9</option></select><p id="codec-description" class="detail"></p></div>
+          <div class="format-field"><label class="field-label" for="container" data-i18n="containerLabel"></label><select id="container"><option value="mp4">MP4 (.mp4)</option><option value="mkv">Matroska (.mkv)</option><option value="webm">WebM (.webm)</option><option value="mov">QuickTime (.mov)</option></select><p id="compatibility" class="detail" role="status" aria-live="polite"></p></div>
+        </div>
+        <div class="details-grid">
+          <details class="technical"><summary data-i18n="technical"></summary><div class="details-content"><dl id="technical-details"></dl><p id="rate-explanation" class="detail"></p></div></details>
+          <details class="advanced"><summary data-i18n="advanced"></summary><div class="details-content"><label class="field-label" for="rate-control" data-i18n="rateLabel"></label><select id="rate-control"><option value="crf" data-i18n="crfOption"></option><option value="bitrate" data-i18n="bitrateOption"></option></select><div id="bitrate-field" hidden><label class="field-label" for="video-bitrate" data-i18n="bitrateLabel"></label><input id="video-bitrate" type="number" min="100" max="200000" step="100" value="4000"><p class="detail" data-i18n="bitrateHelp"></p></div></div></details>
+        </div>
       </div>
-      <label class="field-label" for="codec" data-i18n="codecLabel"></label>
-      <select id="codec"><option value="h264">H.264 / AVC</option><option value="h265">H.265 / HEVC</option><option value="av1">AV1</option><option value="vp9">VP9</option></select>
-      <p id="codec-description" class="detail"></p>
-      <label class="field-label" for="container" data-i18n="containerLabel"></label>
-      <select id="container"><option value="mp4">MP4 (.mp4)</option><option value="mkv">Matroska (.mkv)</option><option value="webm">WebM (.webm)</option><option value="mov">QuickTime (.mov)</option></select>
-      <p id="compatibility" class="detail" role="status" aria-live="polite"></p>
-      <details class="technical"><summary data-i18n="technical"></summary><dl id="technical-details"></dl><p id="rate-explanation" class="detail"></p></details>
-      <details class="advanced"><summary data-i18n="advanced"></summary>
-        <label class="field-label" for="rate-control" data-i18n="rateLabel"></label><select id="rate-control"><option value="crf" data-i18n="crfOption"></option><option value="bitrate" data-i18n="bitrateOption"></option></select>
-        <div id="bitrate-field" hidden><label class="field-label" for="video-bitrate" data-i18n="bitrateLabel"></label><input id="video-bitrate" type="number" min="100" max="200000" step="100" value="4000"><p class="detail" data-i18n="bitrateHelp"></p></div>
-      </details>
-      <label class="field-label" data-i18n="saveIn"></label><button id="output" class="folder">▱ <span id="output-label"></span> <b>…</b></button>
-      <p class="detail" data-i18n="trackNote"></p></div><div class="options-actions"><div class="divider"></div><div class="summary"><span data-i18n="localProcessing"></span><span>⌁</span></div>
-      <button id="start" class="primary full" data-i18n="start" disabled></button><button id="cancel" class="secondary full" data-i18n="cancel" hidden></button><button id="open" class="text-button full" data-i18n="openOutput" hidden></button></div>
+      <div class="options-actions">
+        <div class="destination"><label class="field-label" data-i18n="saveIn"></label><button id="output" class="folder"><svg class="icon" aria-hidden="true"><use href="#icon-folder"/></svg><span id="output-label"></span><span class="folder-change">…</span></button></div>
+        <div class="action-buttons"><button id="start" class="primary" disabled><span data-i18n="start"></span><svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></button><button id="cancel" class="secondary" data-i18n="cancel" hidden></button><button id="open" class="text-button" data-i18n="openOutput" hidden></button></div>
+      </div>
+      <p class="track-note" data-i18n="trackNote"></p>
     </section>
   </div>
-  <footer><span><i></i><span id="engine"></span></span><span data-i18n="footer"></span></footer>
+  <footer><span class="footer-local"><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg><span data-i18n="preserve"></span></span><span>FrameForge <span class="footer-version">0.4</span><span class="footer-dot">/</span><span data-i18n="localProcessing"></span></span></footer>
 </main>
 <script src="formats.js"></script><script src="i18n.js"></script><script src="renderer.js"></script>
 </body></html>

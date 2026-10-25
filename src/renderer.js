@@ -60,7 +60,12 @@ function render() {
   for (const job of jobs) {
     const row = document.createElement('div'); row.className = `job ${job.state}`;
     const top = document.createElement('div'); top.className = 'job-top';
-    const icon = document.createElement('span'); icon.className = 'job-icon'; icon.textContent = job.state === 'done' ? '✓' : '▷';
+    const icon = document.createElement('span'); icon.className = 'job-icon';
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'icon'); svg.setAttribute('aria-hidden', 'true');
+    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    use.setAttribute('href', job.state === 'done' ? '#icon-check' : '#icon-file');
+    svg.append(use); icon.append(svg);
     const info = document.createElement('div'); info.className = 'job-info';
     const title = document.createElement('strong'); title.textContent = job.name; title.title = job.name;
     const choice = job.settings || selection();

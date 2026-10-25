@@ -1,6 +1,6 @@
 {
   "name": "frameforge",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Local video conversion for Windows",
   "main": "src/main.cjs",
   "author": "FrameForge contributors",
