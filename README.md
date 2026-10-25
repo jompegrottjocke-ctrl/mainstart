@@ -2,9 +2,9 @@
 
 ## Download for Windows / Ladda ned för Windows
 
-[![Download for Windows](https://img.shields.io/badge/Download_for_Windows-FrameForge-c3efa3?style=for-the-badge&logo=windows&logoColor=172310)](https://github.com/jompegrottjocke-ctrl/mainstart/releases/latest/download/FrameForge-Setup.exe)
+[![Download for Windows](https://img.shields.io/badge/Download_for_Windows-FrameForge-c3efa3?style=for-the-badge&logo=windows&logoColor=172310)](https://github.com/jompegrottjocke-ctrl/mainstart/releases/latest/download/FrameForge-Setup.exe?download=1)
 
-**[Download FrameForge-Setup.exe / Ladda ned FrameForge-Setup.exe](https://github.com/jompegrottjocke-ctrl/mainstart/releases/latest/download/FrameForge-Setup.exe)**
+**[Download FrameForge-Setup.exe / Ladda ned FrameForge-Setup.exe](https://github.com/jompegrottjocke-ctrl/mainstart/releases/latest/download/FrameForge-Setup.exe?download=1)**
 
 Click to download the latest Windows x64 installer directly. No GitHub login or ZIP extraction is needed. Run the installer, then download FFmpeg inside the app if prompted.
 
