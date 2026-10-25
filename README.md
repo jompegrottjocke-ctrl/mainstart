@@ -2,13 +2,15 @@
 
 ## Download for Windows / Ladda ned för Windows
 
-[![Download for Windows](https://img.shields.io/badge/Download_for_Windows-FrameForge-c3efa3?style=for-the-badge&logo=windows&logoColor=172310)](https://github.com/jompegrottjocke-ctrl/mainstart/actions/workflows/windows.yml)
+[![Download for Windows](https://img.shields.io/badge/Download_for_Windows-FrameForge-c3efa3?style=for-the-badge&logo=windows&logoColor=172310)](https://github.com/jompegrottjocke-ctrl/mainstart/releases/latest/download/FrameForge-Setup.exe)
 
-**[Open Windows downloads / Öppna Windows-nedladdningar](https://github.com/jompegrottjocke-ctrl/mainstart/actions/workflows/windows.yml)**
+**[Download FrameForge-Setup.exe / Ladda ned FrameForge-Setup.exe](https://github.com/jompegrottjocke-ctrl/mainstart/releases/latest/download/FrameForge-Setup.exe)**
 
-Open the latest successful build (green check), select **FrameForge-Windows** under **Artifacts**, unzip the download and run **FrameForge Setup … .exe**. A GitHub login is required to download artifacts. FFmpeg can be downloaded from inside the app.
+Click to download the latest Windows x64 installer directly. No GitHub login or ZIP extraction is needed. Run the installer, then download FFmpeg inside the app if prompted.
 
-Öppna det senaste lyckade bygget (grön bock), välj **FrameForge-Windows** under **Artifacts**, packa upp ZIP-filen och kör **FrameForge Setup … .exe**. Du behöver vara inloggad på GitHub för att hämta filen. FFmpeg kan laddas ned direkt i appen.
+Klicka för att hämta den senaste installationsfilen för Windows x64 direkt. Ingen GitHub-inloggning eller uppackning behövs. Kör installationsfilen och ladda sedan ned FFmpeg i appen om den efterfrågar det.
+
+[All releases / Alla versioner](https://github.com/jompegrottjocke-ctrl/mainstart/releases)
 
 ![FrameForge 0.4 – English interface](docs/frameforge-0.4-en.png)
 
@@ -33,7 +35,7 @@ Filer bearbetas sekventiellt. Avbrutna och misslyckade jobb raderar sin ofullst�
 
 ## Windows-installationsfil
 
-Kör `npm run dist:win` på Windows. Installationsfilen skapas under `dist/`. Byggkommandot använder `--publish never`: ingen GitHub-release publiceras och ingen `GH_TOKEN` behövs. Actions bifogar installationsfilen som en nedladdningsbar artifact. Den är osignerad tills ett kodsigneringscertifikat konfigureras. En Windows-runner för manuell byggning finns i GitHub Actions. Certifikat och FFmpeg ingår inte i distributionen.
+Kör `npm run dist:win` på Windows. Installationsfilen skapas under `dist/`. Byggkommandot använder `--publish never` så att electron-builder endast bygger lokalt. GitHub Actions bygger automatiskt efter kodändringar på `main` och publicerar därefter `FrameForge-Setup.exe` som en GitHub Release i ett separat jobb med GitHubs inbyggda token. Ingen personlig token behöver konfigureras. README-länken följer den senaste publicerade versionen. Installationsfilen bifogas även som en artifact. Den är osignerad tills ett kodsigneringscertifikat konfigureras. En Windows-runner för manuell byggning finns i GitHub Actions. Certifikat och FFmpeg ingår inte i distributionen.
 
 ## Säkerhetsmodell
 
