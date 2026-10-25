@@ -19,7 +19,7 @@ Filer bearbetas sekventiellt. Avbrutna och misslyckade jobb raderar sin ofullst�
 
 ## Windows-installationsfil
 
-Kör `npm run dist:win` på Windows. Installationsfilen skapas under `dist/`. Den är osignerad tills ett kodsigneringscertifikat konfigureras. En Windows-runner för manuell byggning finns i GitHub Actions. Certifikat och FFmpeg ingår inte i distributionen.
+Kör `npm run dist:win` på Windows. Installationsfilen skapas under `dist/`. Byggkommandot använder `--publish never`: ingen GitHub-release publiceras och ingen `GH_TOKEN` behövs. Actions bifogar installationsfilen som en nedladdningsbar artifact. Den är osignerad tills ett kodsigneringscertifikat konfigureras. En Windows-runner för manuell byggning finns i GitHub Actions. Certifikat och FFmpeg ingår inte i distributionen.
 
 ## Säkerhetsmodell
 
