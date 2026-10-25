@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, shell, net } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, net, screen } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const { spawn } = require('node:child_process');
@@ -38,7 +38,8 @@ async function engineStatus() {
 }
 app.whenReady().then(() => {
   try { binary = JSON.parse(fs.readFileSync(settingsFile(), 'utf8')).binary || 'ffmpeg'; } catch {}
-  win = new BrowserWindow({ width: 1280, height: 860, minWidth: 960, minHeight: 720, backgroundColor: '#101216', autoHideMenuBar: true,
+  const area = screen.getPrimaryDisplay().workAreaSize;
+  win = new BrowserWindow({ width: Math.min(1280, area.width), height: Math.min(860, area.height), minWidth: Math.min(720, area.width), minHeight: Math.min(520, area.height), backgroundColor: '#101216', autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true } });
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', event => event.preventDefault());

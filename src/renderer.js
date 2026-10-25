@@ -3,7 +3,7 @@ const { codecs, containers, presets, settingsFor } = window.FrameForgeFormats;
 const { translate, message } = window.FrameForgeI18n;
 let language = 'sv';
 try { if (localStorage.getItem('frameforge.language') === 'en') language = 'en'; } catch {}
-let jobs = [], preset = 'balanced', output = null, ready = false, running = false, stopping = false, installing = false;
+let jobs = [], preset = 'balanced', output = null, ready = false, running = false, stopping = false, installing = false, choosingOutput = false;
 let availableCodecs = null, noticeValue = null, installMessage = null, adjustment = null;
 const t = (key, values) => translate(key, language, values);
 const supported = key => availableCodecs === null || availableCodecs.includes(key);
@@ -16,11 +16,11 @@ function renderNotice() {
 function controls() {
   let valid = true;
   try { settingsFor(selection()); } catch { valid = false; }
-  $('start').disabled = running || installing || !ready || !valid || !supported($('codec').value) || !output || !jobs.some(j => j.state === 'waiting');
+  $('start').disabled = running || installing || choosingOutput || !ready || !valid || !supported($('codec').value) || !jobs.some(j => j.state === 'waiting');
   $('cancel').hidden = !running;
-  for (const id of ['add', 'addMore', 'clear', 'output', 'codec', 'container', 'rate-control', 'video-bitrate', 'settings']) $(id).disabled = running || installing;
-  document.querySelectorAll('.preset').forEach(b => b.disabled = running || installing);
-  $('download-ffmpeg').disabled = installing || running;
+  for (const id of ['add', 'addMore', 'clear', 'output', 'codec', 'container', 'rate-control', 'video-bitrate', 'settings']) $(id).disabled = running || installing || choosingOutput;
+  document.querySelectorAll('.preset').forEach(b => b.disabled = running || installing || choosingOutput);
+  $('download-ffmpeg').disabled = installing || running || choosingOutput;
 }
 function renderSettings() {
   const choice = selection();
@@ -66,7 +66,7 @@ function render() {
     const choice = job.settings || selection();
     const size = document.createElement('small'); size.textContent = t('jobFormat', { size: (job.size / 1048576).toFixed(1), codec: codecs[choice.codec].label, container: containers[choice.container].label });
     info.append(title, size); top.append(icon, info);
-    const remove = document.createElement('button'); remove.className = 'remove'; remove.textContent = '×'; remove.ariaLabel = t('remove', { name: job.name }); remove.disabled = running || installing;
+    const remove = document.createElement('button'); remove.className = 'remove'; remove.textContent = '×'; remove.ariaLabel = t('remove', { name: job.name }); remove.disabled = running || installing || choosingOutput;
     remove.onclick = () => { jobs = jobs.filter(j => j.id !== job.id); render(); }; top.append(remove);
     const status = document.createElement('div'); status.className = 'job-status';
     if (job.state === 'done') status.textContent = t('done', { output: job.output });
@@ -112,9 +112,18 @@ $('container').onchange = () => {
 };
 $('rate-control').onchange = () => { renderSettings(); render(); };
 $('video-bitrate').oninput = () => { renderSettings(); };
+async function chooseOutput() {
+  if (choosingOutput) return false;
+  choosingOutput = true; render();
+  try {
+    const folder = await window.desktop.chooseOutput();
+    if (!folder) return false;
+    output = folder; $('output-label').textContent = folder.path; $('output').title = folder.path;
+    return true;
+  } finally { choosingOutput = false; render(); }
+}
 $('output').onclick = async () => {
-  try { const folder = await window.desktop.chooseOutput(); if (folder) { output = folder; $('output-label').textContent = folder.path; $('output').title = folder.path; controls(); } }
-  catch (error) { notice(error.message); }
+  try { await chooseOutput(); } catch (error) { notice(error.message); }
 };
 function engine(status) {
   ready = status.ready; availableCodecs = status.availableCodecs ?? null;
@@ -135,9 +144,14 @@ $('download-ffmpeg').onclick = async () => {
 window.desktop.onInstallProgress(value => { installMessage = value; $('install-status').textContent = message(value, language); });
 $('settings').onclick = async () => { try { engine(await window.desktop.chooseBinary(language)); } catch (error) { notice(error.message); } };
 $('start').onclick = async () => {
+  if (running || installing || choosingOutput || !ready || !jobs.some(job => job.state === 'waiting')) return;
   const settings = selection();
   try { settingsFor(settings); } catch (error) { notice(error.message); return; }
   if (!supported(settings.codec)) { notice({ key: 'noEncoder' }); return; }
+  if (!output) {
+    try { if (!await chooseOutput()) return; }
+    catch (error) { notice(error.message); return; }
+  }
   running = true; stopping = false; notice(null); $('open').hidden = true; render();
   try {
     for (const job of jobs.filter(j => j.state === 'waiting')) {

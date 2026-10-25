@@ -9,7 +9,7 @@ Detta är en tidig version, inte full funktionsparitet med HandBrake. Undertexte
 1. Installera Node.js 24 LTS. FFmpeg kan hämtas direkt från appen eller installeras manuellt.
 2. Kör `npm ci` i projektmappen.
 3. Kör `npm start`. Om FFmpeg saknas visas **Ladda ned FFmpeg**. Klicka för att hämta, verifiera och installera det automatiskt. Du kan också välja en egen `ffmpeg.exe` via **FFmpeg-inställningar**.
-4. Lägg till videor, välj utdatamapp, kvalitetsprofil, kodare och container. Starta kön.
+4. Lägg till videor och välj kvalitetsprofil, kodare och container. Klicka **Starta konvertering**. Om ingen utdatamapp är vald öppnas mappdialogen automatiskt; konverteringen startar efter valet. Avbryts dialogen ligger kön kvar utan att starta. En redan vald mapp återanvänds.
 
 Filer bearbetas sekventiellt. Avbrutna och misslyckade jobb raderar sin ofullständiga utdatafil. Appen väljer ett ledigt filnamn automatiskt. Kö och utdatamapp sparas inte mellan starter; FFmpeg-sökvägen sparas i användarens appdata. Språk väljs via **Språk / Language** i sidopanelen och sparas lokalt mellan starter.
 
@@ -57,3 +57,7 @@ CRF är konstant kvalitet med variabel bitrate. Värdet går inte att jämföra 
 Byte till en inkompatibel kombination justerar automatiskt det andra valet och visar vad som ändrades. Kodare som saknas i den valda FFmpeg-installationen inaktiveras. Stöd i en container innebär inte att varje spelare eller enhet kan avkoda videon.
 
 Svenska och engelska omfattar profiler, tekniska förklaringar, status, knapptexter och appens vanliga felmeddelanden. FFmpegs egna tekniska felutskrifter behåller originalspråket. Native fildialogers standardknappar följer operativsystemets språk.
+
+## Fönster och layout (0.3.1)
+
+Startfönstret anpassas till skärmens tillgängliga arbetsyta, även vid Windows-skärmskalning. Smalare fönster använder en kolumn och inställningarna följer vanlig sidrullning i stället för en höjdbegränsad inre panel. Startåtgärderna följer med längst ned i den synliga inställningspanelen. Inställningar kan nås utan att förstora fönstret.
