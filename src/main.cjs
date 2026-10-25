@@ -1,15 +1,17 @@
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, net } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const { spawn } = require('node:child_process');
 const { encode } = require('./encoder.cjs');
+const { installFFmpeg } = require('./ffmpeg-install.cjs');
+let installing = false;
 let win, active, binary = 'ffmpeg';
 const sources = new Map(), outputs = new Map();
 const settingsFile = () => path.join(app.getPath('userData'), 'settings.json');
 function saveSettings() { fs.writeFileSync(settingsFile(), JSON.stringify({ binary })); }
-function verifyBinary() {
+function verifyBinary(executable = binary) {
   return new Promise(resolve => {
-    const child = spawn(binary, ['-version'], { windowsHide: true });
+    const child = spawn(executable, ['-version'], { windowsHide: true });
     let output = '', finished = false;
     const finish = value => { if (!finished) { finished = true; clearTimeout(timer); resolve(value); } };
     const timer = setTimeout(() => { child.kill(); finish(false); }, 5000);
@@ -28,7 +30,24 @@ app.whenReady().then(() => {
 });
 app.on('window-all-closed', () => { active?.kill(); app.quit(); });
 ipcMain.handle('status', async () => ({ ready: await verifyBinary(), binary }));
+ipcMain.handle('download-ffmpeg', async () => {
+  if (installing || active) throw new Error('Vänta tills den pågående åtgärden är klar.');
+  installing = true;
+  try {
+    const installed = await installFFmpeg({
+      directory: path.join(app.getPath('userData'), 'tools'),
+      fetcher: (url, options) => net.fetch(url, options),
+      verify: verifyBinary,
+      progress: message => { if (!win.isDestroyed()) win.webContents.send('install-progress', message); },
+    });
+    const previous = binary;
+    binary = installed;
+    try { saveSettings(); } catch (error) { binary = previous; throw error; }
+    return { ready: true, binary };
+  } finally { installing = false; }
+});
 ipcMain.handle('choose-binary', async () => {
+  if (installing || active) throw new Error('Vänta tills den pågående åtgärden är klar.');
   const result = await dialog.showOpenDialog(win, { title: 'Välj FFmpeg', properties: ['openFile'], filters: [{ name: 'FFmpeg', extensions: process.platform === 'win32' ? ['exe'] : ['*'] }] });
   if (!result.canceled) { binary = result.filePaths[0]; saveSettings(); }
   return { ready: await verifyBinary(), binary };
@@ -44,7 +63,7 @@ ipcMain.handle('choose-output', async () => {
   return { id, path: result.filePaths[0] };
 });
 ipcMain.handle('encode', async (_, job) => {
-  if (active) throw new Error('En konvertering pågår redan.');
+  if (active || installing) throw new Error('Vänta tills den pågående åtgärden är klar.');
   const input = sources.get(job.id), folder = outputs.get(job.outputId);
   if (!input || !folder) throw new Error('Välj videofiler och utdatamapp igen.');
   const base = path.basename(input, path.extname(input));

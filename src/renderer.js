@@ -1,11 +1,11 @@
 const $ = id => document.getElementById(id);
-let jobs = [], preset = 'balanced', output = null, ready = false, running = false, stopping = false;
+let jobs = [], preset = 'balanced', output = null, ready = false, running = false, stopping = false, installing = false;
 function notice(message) { $('notice').textContent = message; $('notice').hidden = !message; }
 function controls() {
-  $('start').disabled = running || !ready || !output || !jobs.some(j => j.state === 'waiting');
+  $('start').disabled = running || installing || !ready || !output || !jobs.some(j => j.state === 'waiting');
   $('cancel').hidden = !running;
-  for (const id of ['add', 'addMore', 'clear', 'output', 'codec', 'settings']) $(id).disabled = running;
-  document.querySelectorAll('.preset').forEach(b => b.disabled = running);
+  for (const id of ['add', 'addMore', 'clear', 'output', 'codec', 'settings']) $(id).disabled = running || installing;
+  document.querySelectorAll('.preset').forEach(b => b.disabled = running || installing);
 }
 function render() {
   $('count').textContent = jobs.length; $('empty').hidden = jobs.length > 0; $('addMore').hidden = jobs.length === 0;
@@ -40,9 +40,19 @@ $('output').onclick = async () => {
   catch (error) { notice(error.message); }
 };
 function engine(status) {
+  $('install-panel').hidden = status.ready;
+  $('download-ffmpeg').disabled = installing;
   ready = status.ready; $('engine').textContent = ready ? 'FFmpeg är redo' : 'FFmpeg saknas';
-  notice(ready ? '' : 'Installera FFmpeg för Windows och välj ffmpeg.exe via FFmpeg-inställningar. Filerna behandlas lokalt på din dator.'); controls();
+  notice(''); controls();
 }
+$('download-ffmpeg').onclick = async () => {
+  installing = true; $('download-ffmpeg').disabled = true; controls(); notice('');
+  $('install-status').textContent = 'Förbereder nedladdningen…';
+  try { engine(await window.desktop.downloadFFmpeg()); notice('FFmpeg är installerat och redo. Nu kan du konvertera dina videor.'); }
+  catch (error) { $('install-status').textContent = 'Installationen misslyckades. Du kan försöka igen eller välja en egen ffmpeg.exe via inställningarna.'; notice(error.message); }
+  finally { installing = false; $('download-ffmpeg').disabled = false; controls(); }
+};
+window.desktop.onInstallProgress(message => { $('install-status').textContent = message; });
 $('settings').onclick = async () => { try { engine(await window.desktop.chooseBinary()); } catch (error) { notice(error.message); } };
 $('start').onclick = async () => {
   running = true; stopping = false; notice(''); $('open').hidden = true; render();

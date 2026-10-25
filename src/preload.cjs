@@ -1,6 +1,8 @@
 const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('desktop', {
   status: () => ipcRenderer.invoke('status'),
+  downloadFFmpeg: () => ipcRenderer.invoke('download-ffmpeg'),
+  onInstallProgress: callback => ipcRenderer.on('install-progress', (_, message) => callback(message)),
   chooseBinary: () => ipcRenderer.invoke('choose-binary'),
   addFiles: () => ipcRenderer.invoke('add-files'),
   chooseOutput: () => ipcRenderer.invoke('choose-output'),
